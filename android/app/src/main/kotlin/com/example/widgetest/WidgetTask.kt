@@ -1,4 +1,4 @@
-package com.example.widgetest // Make sure this matches your package name
+package com.example.widgetest 
 
 import org.json.JSONObject
 import java.time.LocalDate
@@ -17,7 +17,6 @@ data class WidgetTask(
             try {
                 parsedDate = LocalDateTime.parse(json.getString("createdAt"))
             } catch (e: DateTimeParseException) {
-                // Log error or handle default date
             }
             return WidgetTask(
                 id = json.getString("id"),
@@ -28,15 +27,11 @@ data class WidgetTask(
         }
     }
 
-    // Simple check for "Today" based on createdAt date.
-    // You might want more sophisticated logic depending on how "Today" is determined in your app.
     fun isConsideredToday(): Boolean {
         return createdAt?.toLocalDate()?.isEqual(LocalDate.now()) ?: false
     }
 
-    // Placeholder for reminder logic - adapt as needed
     fun hasReminder(): Boolean {
-        // return true // or based on some property of the task
-        return isConsideredToday() // For demo, show bell if "Today"
+        return isConsideredToday() 
     }
 }

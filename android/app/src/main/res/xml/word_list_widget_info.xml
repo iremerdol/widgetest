@@ -7,5 +7,5 @@
     android:description="@string/app_widget_description"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
-    android:configure="com.example.widgetest.MainActivity"> 
+   > 
 </appwidget-provider>

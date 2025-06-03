@@ -1,4 +1,4 @@
-package com.example.widgetest // Make sure this matches your package name
+package com.example.widgetest 
 
 import android.content.Context
 import android.content.Intent
@@ -16,17 +16,15 @@ class WidgetTaskRemoteViewsFactory(
     private var tasks: MutableList<WidgetTask> = mutableListOf()
 
     override fun onCreate() {
-        // Connect to data source, load initial data
         loadTasksFromPreferences()
     }
 
     override fun onDataSetChanged() {
-        // This is called by notifyAppWidgetViewDataChanged()
-        val identityToken = Binder.clearCallingIdentity() // Temporarily clear calling identity
+        val identityToken = Binder.clearCallingIdentity() 
         try {
             loadTasksFromPreferences()
         } finally {
-            Binder.restoreCallingIdentity(identityToken) // Restore calling identity
+            Binder.restoreCallingIdentity(identityToken) 
         }
     }
 
@@ -49,12 +47,11 @@ class WidgetTaskRemoteViewsFactory(
                             else R.drawable.ic_widget_radio_button_unchecked
         views.setImageViewResource(R.id.task_item_checkbox_image, checkboxResId)
 
-        // Handle "Today" and reminder icon visibility based on your task's logic
-        if (task.isConsideredToday()) { // Example: shows if createdAt is today
+        if (task.isConsideredToday()) { 
             views.setViewVisibility(R.id.task_item_details_container, android.view.View.VISIBLE)
             views.setTextViewText(R.id.task_item_due_date_text, "Today")
-            // Show/hide reminder icon based on a task property (e.g., if a reminder is set)
-            if (task.hasReminder()) { // You'll need to implement this logic in WidgetTask
+            
+            if (task.hasReminder()) { 
                  views.setViewVisibility(R.id.task_item_reminder_image, android.view.View.VISIBLE)
             } else {
                  views.setViewVisibility(R.id.task_item_reminder_image, android.view.View.GONE)
@@ -63,9 +60,7 @@ class WidgetTaskRemoteViewsFactory(
             views.setViewVisibility(R.id.task_item_details_container, android.view.View.GONE)
         }
 
-        // Set up fill-in intent for item clicks (e.g., to open the app to this task)
         val fillInIntent = Intent()
-        // You can add extras to identify the task, e.g., task.id
         fillInIntent.putExtra("task_id", task.id)
         views.setOnClickFillInIntent(R.id.task_item_root, fillInIntent)
 
@@ -73,11 +68,10 @@ class WidgetTaskRemoteViewsFactory(
     }
 
     override fun getLoadingView(): RemoteViews? {
-        // Optional: Return a RemoteViews for a loading indicator
-        return null // Or a custom layout
+        return null 
     }
 
-    override fun getViewTypeCount(): Int = 1 // Only one type of item view
+    override fun getViewTypeCount(): Int = 1 
 
     override fun getItemId(position: Int): Long = tasks[position].id.hashCode().toLong()
 
@@ -86,7 +80,6 @@ class WidgetTaskRemoteViewsFactory(
     private fun loadTasksFromPreferences() {
         tasks.clear()
         val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-        // Flutter's shared_preferences plugin prefixes keys with "flutter."
         val tasksJsonString = prefs.getString("flutter.tasks", null)
         Log.d("WidgetFactory", "Tasks JSON from Prefs: $tasksJsonString")
 
@@ -97,8 +90,6 @@ class WidgetTaskRemoteViewsFactory(
                 for (i in 0 until jsonArray.length()) {
                     tasks.add(WidgetTask.fromJson(jsonArray.getJSONObject(i)))
                 }
-                // Optional: Sort tasks (e.g., incomplete first, then by date)
-                // tasks.sortWith(compareBy<WidgetTask> { it.isCompleted }.thenByDescending { it.createdAt })
             } catch (e: JSONException) {
                 Log.e("WidgetFactory", "Error parsing tasks JSON: ${e.message}")
                 tasks.clear()

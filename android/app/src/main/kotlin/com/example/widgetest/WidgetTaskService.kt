@@ -1,4 +1,4 @@
-package com.example.widgetest // Make sure this matches your package name
+package com.example.widgetest 
 
 import android.content.Intent
 import android.widget.RemoteViewsService

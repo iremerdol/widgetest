@@ -4,35 +4,17 @@ import 'package:flutter/services.dart';
 import 'dart:convert';
 
 void main() {
-  // It's good practice to ensure Flutter bindings are initialized,
-  // especially when using plugins or async operations before runApp.
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const RootApp()); // MaterialApp will be here
+  runApp(const RootApp());
   initializeWidget();
 }
 
 const MethodChannel _channel = MethodChannel('widget_channel');
 
-// Note: initializeWidget creates its own TaskManager instance.
-// The UI creates another. This might lead to data inconsistencies if not handled carefully.
-// For simplicity now, we'll assume the SharedPreferences layer keeps them in sync.
-// A better approach would be to use a state management solution or pass a single TaskManager instance.
 void initializeWidget() async {
   final taskManager = TaskManager();
   await taskManager.loadTasks();
-  // Consider if you always want to add these if empty,
-  // or only on first ever run.
-  if (taskManager.tasks.isEmpty) {
-    // For demonstration, let's add a few tasks that might have "Today" details
-    await taskManager.addTask(Task(title: 'Pick up laundry', createdAt: DateTime.now()));
-    await taskManager.addTask(Task(title: 'Deliver variables according to client...', createdAt: DateTime.now()));
-    await taskManager.addTask(Task(title: 'Buy cake for Jon\'s bday', createdAt: DateTime.now().add(const Duration(days: 1))));
-    await taskManager.addTask(Task(title: 'Plan for budget'));
-    await taskManager.addTask(Task(title: 'Practice guitar'));
-    await taskManager.addTask(Task(title: 'Review deck with clients', createdAt: DateTime.now()));
-
-  }
-  // Initialize widget with current tasks
+  
   try {
     await _channel.invokeMethod('updateWidget');
   } on MissingPluginException catch (e) {
@@ -84,7 +66,7 @@ class TaskManager {
         tasks = jsonList.map((json) => Task.fromJson(json)).toList();
       } catch (e) {
         print("Error decoding tasks from SharedPreferences: $e");
-        tasks = []; // Reset to empty list on error
+        tasks = []; 
       }
     }
   }
@@ -93,7 +75,6 @@ class TaskManager {
     final prefs = await SharedPreferences.getInstance();
     final tasksJson = tasks.map((task) => task.toJson()).toList();
     await prefs.setString('tasks', jsonEncode(tasksJson));
-    // Notify widget to update
     try {
       await _channel.invokeMethod('updateWidget');
     } on MissingPluginException catch (e) {
@@ -130,7 +111,6 @@ class TaskManager {
   }
 }
 
-// This is the new root widget that provides MaterialApp
 class RootApp extends StatelessWidget {
   const RootApp({super.key});
 
@@ -139,13 +119,12 @@ class RootApp extends StatelessWidget {
     return MaterialApp(
       title: 'To-Do List Widget',
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
-      home: const ToDoAppPage(), // Your original MyApp content is now the home
+      home: const ToDoAppPage(), 
     );
   }
 }
 
 
-// Renamed MyApp to ToDoAppPage for clarity, or you can keep MyApp name
 class ToDoAppPage extends StatefulWidget {
   const ToDoAppPage({super.key});
 
@@ -165,7 +144,6 @@ class _ToDoAppPageState extends State<ToDoAppPage> {
 
   Future<void> _loadTasks() async {
     await taskManager.loadTasks();
-    // Ensure widget is still mounted before calling setState
     if (mounted) {
       setState(() {});
     }
@@ -183,11 +161,9 @@ class _ToDoAppPageState extends State<ToDoAppPage> {
 
   Future<void> _editTask(Task task) async {
     _taskController.text = task.title;
-    // The `context` used here now has MaterialApp as an ancestor
-    // because ToDoAppPage is a child of MaterialApp (via RootApp).
     showDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog( // dialogContext is fine too
+      builder: (dialogContext) => AlertDialog( 
             title: const Text('Edit Task'),
             content: TextField(
               controller: _taskController,
@@ -197,7 +173,7 @@ class _ToDoAppPageState extends State<ToDoAppPage> {
             actions: [
               TextButton(
                 onPressed: () {
-                  _taskController.clear(); // Clear controller on cancel
+                  _taskController.clear();
                   Navigator.pop(dialogContext);
                 },
                 child: const Text('Cancel'),
@@ -218,9 +194,7 @@ class _ToDoAppPageState extends State<ToDoAppPage> {
             ],
           ),
     ).then((_) {
-      // Clear the controller if the dialog is dismissed by other means (e.g. back button)
-      // or if it wasn't cleared by cancel/save.
-      if (_taskController.text == task.title) { // Check if it's still the old title
+      if (_taskController.text == task.title) { 
           _taskController.clear();
       }
     });
@@ -228,11 +202,9 @@ class _ToDoAppPageState extends State<ToDoAppPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Now, ToDoAppPage returns a Scaffold directly.
-    // The `context` here is already a descendant of the MaterialApp in RootApp.
     return Scaffold(
       appBar: AppBar(
-        title: const Text('To-Do List'), // Simpler title for the page
+        title: const Text('To-Do List'), 
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),

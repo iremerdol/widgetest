@@ -1,4 +1,4 @@
-package com.example.widgetest // Make sure this matches your package name
+package com.example.widgetest 
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
@@ -23,12 +23,8 @@ class MainActivity : FlutterActivity() {
                     val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
 
                     if (appWidgetIds.isNotEmpty()) {
-                        // This tells the ListView in the widget to refresh its data.
-                        // It will call onDataSetChanged() in your RemoteViewsFactory.
                         appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_task_listview)
 
-                        // Optionally, to update other parts of the widget (like date in header) if they changed.
-                        // You could also call the full onUpdate loop:
                          for (appWidgetId in appWidgetIds) {
                              WordListWidget.updateAppWidget(applicationContext, appWidgetManager, appWidgetId)
                          }
@@ -36,7 +32,7 @@ class MainActivity : FlutterActivity() {
                         result.success(null)
                     } else {
                         Log.d("MainActivity", "No widget instances found to update.")
-                        result.success(null) // Still success, just nothing to update
+                        result.success(null)
                     }
                 } catch (e: Exception) {
                     Log.e("MainActivity", "Error updating widget: ${e.message}", e)
@@ -62,9 +58,6 @@ class MainActivity : FlutterActivity() {
         if (intent?.action == "com.example.widgetest.ITEM_CLICK") {
             val taskId = intent.getStringExtra("task_id")
             Log.d("MainActivity", "Widget item clicked, Task ID: $taskId")
-            // Here you can navigate to a specific part of your Flutter app
-            // or show a dialog, etc., based on the taskId.
-            // For now, just logging.
         }
     }
 }
