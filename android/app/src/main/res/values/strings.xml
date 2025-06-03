@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">widgetest</string>
+    <string name="app_widget_description">My Day To-Do List</string>
+</resources>

@@ -20,10 +20,17 @@ const MethodChannel _channel = MethodChannel('widget_channel');
 void initializeWidget() async {
   final taskManager = TaskManager();
   await taskManager.loadTasks();
+  // Consider if you always want to add these if empty,
+  // or only on first ever run.
   if (taskManager.tasks.isEmpty) {
-    await taskManager.addTask(Task(title: 'Buy groceries'));
-    await taskManager.addTask(Task(title: 'Walk the dog'));
-    await taskManager.addTask(Task(title: 'Call mom'));
+    // For demonstration, let's add a few tasks that might have "Today" details
+    await taskManager.addTask(Task(title: 'Pick up laundry', createdAt: DateTime.now()));
+    await taskManager.addTask(Task(title: 'Deliver variables according to client...', createdAt: DateTime.now()));
+    await taskManager.addTask(Task(title: 'Buy cake for Jon\'s bday', createdAt: DateTime.now().add(const Duration(days: 1))));
+    await taskManager.addTask(Task(title: 'Plan for budget'));
+    await taskManager.addTask(Task(title: 'Practice guitar'));
+    await taskManager.addTask(Task(title: 'Review deck with clients', createdAt: DateTime.now()));
+
   }
   // Initialize widget with current tasks
   try {

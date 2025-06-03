@@ -1,30 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/widget_container"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="12dp"
-    android:background="@android:color/white">
+    android:background="@android:color/transparent"
+    android:id="@+id/widget_root_layout">
 
-    <TextView
-        android:id="@+id/widget_title"
+    <!-- Header -->
+    <LinearLayout
+        android:id="@+id/widget_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="My Tasks"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="@android:color/black" />
+        android:background="#0D47A1"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/widget_header_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_widget_sun"
+            android:layout_marginEnd="8dp"/>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/widget_title_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="My Day"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/widget_date_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="24 January"
+                android:textColor="@android:color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/widget_add_button"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="6dp"
+            android:src="@drawable/ic_widget_add"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="Add Task"/>
+    </LinearLayout>
+
+    <!-- Task List -->
+    <ListView
+        android:id="@+id/widget_task_listview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#FFFFFF"
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        tools:listitem="@layout/widget_task_item_layout" />
 
     <TextView
-        android:id="@+id/words_text"
+        android:id="@+id/widget_empty_view_text"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="4dp"
-        android:textSize="14sp"
-        android:textColor="@android:color/black"
-        android:lineSpacingExtra="2dp"
-        android:scrollbars="vertical"
-        android:scrollHorizontally="false"
-        android:maxLines="100" />
+        android:gravity="center"
+        android:text="No tasks for today!"
+        android:textColor="@android:color/darker_gray"
+        android:background="#FFFFFF"
+        android:visibility="gone"
+        android:textSize="16sp"/>
+
 </LinearLayout>
