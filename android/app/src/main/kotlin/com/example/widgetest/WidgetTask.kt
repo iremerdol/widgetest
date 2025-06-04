@@ -1,19 +1,19 @@
-package com.example.widgetest 
+package com.example.widgetest
 
 import android.util.Log
 import org.json.JSONObject
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
-import java.time.format.FormatStyle
 
 data class WidgetTask(
     val id: String,
     val title: String,
     val isCompleted: Boolean,
     val createdAt: LocalDateTime?,
-    val deadline: LocalDateTime? 
+    val deadline: LocalDateTime?
 ) {
     companion object {
         fun fromJson(json: JSONObject): WidgetTask {
@@ -52,22 +52,61 @@ data class WidgetTask(
 
     fun isDeadlinePassed(): Boolean {
         if (deadline == null) return false
-        return deadline.toLocalDate().isBefore(LocalDate.now())
+        return deadline.isBefore(LocalDateTime.now())
     }
 
     fun getFormattedDeadlineForWidget(): String? {
         if (deadline == null) return null
 
-        val today = LocalDate.now()
-        val deadlineDate = deadline.toLocalDate()
-        val dateFormatter = DateTimeFormatter.ofPattern("dd MMM") 
+        val now = LocalDateTime.now()
+        val todayDate = now.toLocalDate()
+        val deadlineDateTime = deadline
+        val deadlineDate = deadlineDateTime.toLocalDate()
+
+        val hasSpecificTime = deadlineDateTime.toLocalTime().hour != 0 || deadlineDateTime.toLocalTime().minute != 0
+
+        val dateFormatter = DateTimeFormatter.ofPattern("dd MMM")
+        val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
         return when {
-            deadlineDate.isEqual(today) -> "Ends Today" 
-            deadlineDate.isEqual(today.plusDays(1)) -> "Ends Tomorrow"
-            deadlineDate.isBefore(today) && !isCompleted -> "Overdue: ${deadlineDate.format(dateFormatter)}"
-            deadlineDate.isBefore(today) && isCompleted -> "Done (Overdue: ${deadlineDate.format(dateFormatter)})" 
-            else -> deadlineDate.format(dateFormatter) 
+            deadlineDate.isEqual(todayDate) -> {
+                val difference = Duration.between(now, deadlineDateTime)
+
+                if (difference.isNegative) { 
+                    val absDifference = difference.abs()
+                    val hours = absDifference.toHours()
+                    val minutes = absDifference.toMinutes() % 60
+
+                    when {
+                        hours > 0 && minutes > 0 -> "${hours}h ${minutes}m ago"
+                        hours > 0 -> "${hours}h ago"
+                        minutes > 0 -> "${minutes}m ago"
+                        else -> "Just now"
+                    }
+                } else { 
+                    val hours = difference.toHours()
+                    val minutes = difference.toMinutes() % 60
+                    when {
+                        hours > 0 && minutes > 0 -> "${hours}h ${minutes}m left"
+                        hours > 0 -> "${hours}h left"
+                        minutes > 0 -> "${minutes}m left"
+                        else -> "Due now"
+                    }
+                }
+            }
+            deadlineDateTime.isBefore(now) && !isCompleted -> {
+                "Overdue: ${deadlineDate.format(dateFormatter)}${if (hasSpecificTime) ", ${deadlineDateTime.toLocalTime().format(timeFormatter)}" else ""}"
+            }
+            deadlineDateTime.isBefore(now) && isCompleted -> {
+                "Done (Was ${deadlineDate.format(dateFormatter)}${if (hasSpecificTime) ", ${deadlineDateTime.toLocalTime().format(timeFormatter)}" else ""})"
+            }
+            deadlineDate.isEqual(todayDate.plusDays(1)) -> {
+                if (hasSpecificTime) "Tomorrow, ${deadlineDateTime.toLocalTime().format(timeFormatter)}"
+                else "Tomorrow"
+            }
+            else -> {
+                "${deadlineDate.format(dateFormatter)}${if (hasSpecificTime) ", ${deadlineDateTime.toLocalTime().format(timeFormatter)}" else ""}"
+            }
         }
     }
 

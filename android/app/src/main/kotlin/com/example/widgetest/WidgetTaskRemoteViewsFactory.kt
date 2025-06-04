@@ -1,15 +1,16 @@
-package com.example.widgetest 
+package com.example.widgetest
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.Paint
 import android.os.Binder
 import android.util.Log
+import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import org.json.JSONArray
 import org.json.JSONException
-import android.graphics.Color 
-import android.view.View
 
 class WidgetTaskRemoteViewsFactory(
     private val context: Context
@@ -45,18 +46,25 @@ class WidgetTaskRemoteViewsFactory(
 
         views.setTextViewText(R.id.task_item_title_text, task.title)
 
+        var titleColor = Color.BLACK
+        var titlePaintFlags = Paint.ANTI_ALIAS_FLAG
+
+        if (task.isDeadlinePassed() && !task.isCompleted) {
+            titleColor = Color.RED
+        }
+
+        if (task.isCompleted) {
+            titleColor = Color.GRAY
+            titlePaintFlags = titlePaintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+        }
+
+        views.setTextColor(R.id.task_item_title_text, titleColor)
+        views.setInt(R.id.task_item_title_text, "setPaintFlags", titlePaintFlags)
+
+
         val checkboxResId = if (task.isCompleted) R.drawable.ic_widget_radio_button_checked
                             else R.drawable.ic_widget_radio_button_unchecked
         views.setImageViewResource(R.id.task_item_checkbox_image, checkboxResId)
-
-        if (task.isCompleted) {
-            views.setInt(R.id.task_item_title_text, "setPaintFlags",
-                android.graphics.Paint.STRIKE_THRU_TEXT_FLAG or android.graphics.Paint.ANTI_ALIAS_FLAG)
-            views.setTextColor(R.id.task_item_title_text, Color.GRAY)
-        } else {
-            views.setInt(R.id.task_item_title_text, "setPaintFlags", android.graphics.Paint.ANTI_ALIAS_FLAG) 
-             views.setTextColor(R.id.task_item_title_text, Color.BLACK) 
-        }
 
 
         val deadlineText = task.getFormattedDeadlineForWidget()
@@ -64,17 +72,17 @@ class WidgetTaskRemoteViewsFactory(
         if (deadlineText != null) {
             views.setViewVisibility(R.id.task_item_details_container, View.VISIBLE)
             views.setTextViewText(R.id.task_item_due_date_text, deadlineText)
-            views.setViewVisibility(R.id.task_item_calendar_image, View.VISIBLE) 
+            views.setViewVisibility(R.id.task_item_calendar_image, View.VISIBLE)
 
             when {
-                task.isDeadlineToday() && !task.isCompleted -> {
-                    views.setTextColor(R.id.task_item_due_date_text, Color.parseColor("#FFA000")) 
-                }
                 task.isDeadlinePassed() && !task.isCompleted -> {
                     views.setTextColor(R.id.task_item_due_date_text, Color.RED)
                 }
-                else -> {
-                    views.setTextColor(R.id.task_item_due_date_text, Color.DKGRAY) 
+                task.isDeadlineToday() && !task.isCompleted -> { 
+                    views.setTextColor(R.id.task_item_due_date_text, Color.parseColor("#FFA000")) 
+                }
+                else -> { 
+                    views.setTextColor(R.id.task_item_due_date_text, Color.DKGRAY)
                 }
             }
 
@@ -88,24 +96,24 @@ class WidgetTaskRemoteViewsFactory(
         }
 
         val fillInIntent = Intent()
-        fillInIntent.putExtra("task_id", task.id) 
+        fillInIntent.putExtra("task_id", task.id)
         views.setOnClickFillInIntent(R.id.task_item_root, fillInIntent)
 
         return views
     }
 
     override fun getLoadingView(): RemoteViews? {
-        return null 
+        return null
     }
 
-    override fun getViewTypeCount(): Int = 1 
+    override fun getViewTypeCount(): Int = 1
 
     override fun getItemId(position: Int): Long = tasks[position].id.hashCode().toLong()
 
     override fun hasStableIds(): Boolean = true
 
     private fun loadTasksFromPreferences() {
-        tasks.clear() 
+        tasks.clear()
         val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
         val tasksJsonString = prefs.getString("flutter.tasks", null)
         Log.d("WidgetFactory", "Tasks JSON from Prefs: $tasksJsonString")
@@ -118,7 +126,7 @@ class WidgetTaskRemoteViewsFactory(
                 }
                 tasks.sortWith(compareBy<WidgetTask> { it.isCompleted }
                     .thenBy { it.deadline == null } 
-                    .thenBy { it.deadline }
+                    .thenBy { it.deadline }         
                 )
             } catch (e: JSONException) {
                 Log.e("WidgetFactory", "Error parsing tasks JSON: ${e.message}")
